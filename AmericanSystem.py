@@ -43,31 +43,15 @@ class AmericanSystem:
             coords_list.append([lon, lat])
 
         d = {'Longitude': lon_list, 'Latitude': lat_list}
-        #geometry.append(LineString(coords_list))
 
         gdf = GeoDataFrame(d, geometry=geometry)
 
-        print('Loading map')
-        bounding_box = (-165, 15, -50, 50)
-        '''
-        import os
-        world = gpd.read_file(os.getcwd()+'\\resources\\cb_2018_us_state_500k', bbox=bounding_box)
-        
-        world = gpd.read_file(geodatasets.data.naturalearth.land['url'])
-        usa = world[world.continent == 'North America']
-        '''
         states = gpd.read_file("./resources/cb_2018_us_state_500k/")
 
         from shapely import Polygon
         polygon = Polygon([(-160, 15), (-160, 50), (-50, 50), (-50, 15)])
 
         gdf.plot(ax=states.clip(polygon).plot(figsize=(10, 6)), marker='o', color='red', markersize=15)
-
-        '''
-        poly_gdf = gpd.GeoDataFrame(geometry=LineString(coords_list), crs=states.crs)
-        fig, ax1 = plt.subplots(0, figsize=(10, 6))
-        poly_gdf.boundary.plot(ax = ax1, color="red")
-        '''
 
         for i in range(1, len(path)):
             plt.plot([coords_list[i-1][0], coords_list[i][0]], [coords_list[i-1][1],coords_list[i][1]], color='blue')
