@@ -1,8 +1,9 @@
-import pandas as pd
+from shapely import LineString
 from shapely.geometry import Point
 import geopandas as gpd
 from geopandas import GeoDataFrame
 import geodatasets
+import matplotlib.pyplot as plt
 
 from ResourceLoader import ResourceLoader
 
@@ -14,16 +15,66 @@ class AmericanSystem:
         else:
             r = ResourceLoader(filename)
 
-        self.distances = r.quick_load(10)[0]  # discard info on city population, ecc
+        self.distances, self.cities = r.quick_load(10)  # discard info on city population, ecc
 
-    def show_route(self, begin, goal):
+    def print_route(self, begin, goal):
 
         path, total_length = self.find_path(begin, goal)
-        last = path[0]
+        previous = path[0]
         for city in path[1:]:
-            print('From ' + str(last) + ' to ' + str(city))
-            last = city
+            print('From ' + str(previous) + ' to ' + str(city))
+            previous = city
         print('Total length: ' + str(total_length))
+
+    def show_route(self, begin, goal):
+        path, total_length = self.find_path(begin, goal)
+        print('Path calculated')
+        geometry = []
+        lat_list = []
+        lon_list = []
+
+        coords_list = []
+
+        for city_name in path:
+            lat, lon = self.cities[city_name].get_coordinates()
+            geometry.append(Point(lon, lat))
+            lat_list.append(lat)
+            lon_list.append(lon)
+            coords_list.append([lon, lat])
+
+        d = {'Longitude': lon_list, 'Latitude': lat_list}
+        #geometry.append(LineString(coords_list))
+
+        gdf = GeoDataFrame(d, geometry=geometry)
+
+        print('Loading map')
+        bounding_box = (-165, 15, -50, 50)
+        '''
+        import os
+        world = gpd.read_file(os.getcwd()+'\\resources\\cb_2018_us_state_500k', bbox=bounding_box)
+        
+        world = gpd.read_file(geodatasets.data.naturalearth.land['url'])
+        usa = world[world.continent == 'North America']
+        '''
+        states = gpd.read_file("./resources/cb_2018_us_state_500k/")
+
+        from shapely import Polygon
+        polygon = Polygon([(-160, 15), (-160, 50), (-50, 50), (-50, 15)])
+
+        gdf.plot(ax=states.clip(polygon).plot(figsize=(10, 6)), marker='o', color='red', markersize=15)
+
+        '''
+        poly_gdf = gpd.GeoDataFrame(geometry=LineString(coords_list), crs=states.crs)
+        fig, ax1 = plt.subplots(0, figsize=(10, 6))
+        poly_gdf.boundary.plot(ax = ax1, color="red")
+        '''
+
+        for i in range(1, len(path)):
+            plt.plot([coords_list[i-1][0], coords_list[i][0]], [coords_list[i-1][1],coords_list[i][1]], color='blue')
+            print(coords_list[i-1], coords_list[i])
+
+        plt.show()
+
 
     def find_path(self, begin, goal):
         if begin == goal:
@@ -43,7 +94,11 @@ class AmericanSystem:
 
         found = False
         while len(border) > 0:
-            # would be more efficient with a min-heap
+            # this would be more efficient with a min-heap (but would require implementing a min-heap or importing a
+            # library). cost: O(log n) to extract the minimum, O(log n) to add an element to the heap
+            # another solution (worse) would be keeping border sorted and every time I add/change elements to it I put
+            # it in the correct position to keep it sorted O(1) to extract min, O(n) add an element
+            # but since I don't have that many cities (100) I don't need that much efficiency
             min_pos = 0
             for i in range(1, len(border)):
                 if city_value[border[i]] < city_value[border[min_pos]]:
@@ -81,7 +136,7 @@ class AmericanSystem:
 
 if __name__ == '__main__':
     am = AmericanSystem()
-    am.show_route('Los Angeles; California', 'San Antonio; Texas')
+    am.show_route('Honolulu; Hawaii', 'Boston; Massachusetts')
 
     '''
     # this can be used to check reachability

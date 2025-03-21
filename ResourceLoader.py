@@ -19,7 +19,6 @@ class ResourceLoader:
         else:
             return self.load(closest_to_keep=closest_to_keep)
 
-
     def load(self, closest_to_keep=10, read_distances=False,verbose=False):
 
         geolocator = Nominatim(user_agent="ResourceLoader")
