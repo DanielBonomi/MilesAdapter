@@ -1,3 +1,4 @@
+import os
 
 from City import City
 
@@ -7,11 +8,19 @@ from geopy.geocoders import Nominatim
 import json
 
 class ResourceLoader:
-    def __init__(self, filename):
+    def __init__(self, filename='resources/cities.csv'):
         self.filename = filename
-        self.cache_file = 'resources/cities_distances.json'
+        self.cache_file = 'resources/cities_info.json'
 
-    def load(self, closest_to_keep=5, read_distances=False,verbose=False):
+    def quick_load(self, closest_to_keep=10):
+
+        if os.path.isfile(self.cache_file) and not closest_to_keep != 10:
+            return self.load(closest_to_keep=closest_to_keep, read_distances=True)
+        else:
+            return self.load(closest_to_keep=closest_to_keep)
+
+
+    def load(self, closest_to_keep=10, read_distances=False,verbose=False):
 
         geolocator = Nominatim(user_agent="ResourceLoader")
 
@@ -31,7 +40,7 @@ class ResourceLoader:
         if verbose:
             print('Loaded csv')
 
-        if read_distances: # read distances from json instead of computing them
+        if read_distances:  # read distances from json instead of computing them
             with open(self.cache_file, 'r') as file:
                 json_file = json.load(file)
                 cities_distances = json_file['distances']
@@ -84,14 +93,28 @@ class ResourceLoader:
                 cities_distances[city] = sorted_cities[:closest_to_keep]
 
             if verbose:
-                print('Removed extra distances')
+                print('Removed extra links')
+
+            # now I add back links between cities so that if I can get from A to B
+            # then  you can also go from B to A
+            # this allow to get to Hawaii (otherwise impossible)
+
+            for city_from in cities_distances.keys():
+                for city_to, dist in cities_distances[city_from]:
+                    if city_from not in cities_distances[city_to]:
+                        cities_distances[city_to].append([city_from, dist])
+            print('Added links for reachability')
 
             # get coord list to write down in json file
             coords = {}
             for el in cities_dict.values():
                 coords[el.name] = el.get_coordinates()
             with open(self.cache_file, 'w') as outfile:
-                d = {'distance': cities_distances, 'coords': coords}
+                d = {'distances': cities_distances, 'coords': coords}
                 json.dump(d, outfile)
 
         return cities_distances, cities_dict
+
+if __name__=='__main__':
+    r = ResourceLoader('resources/cities.csv')
+    r.load(10, read_distances=False, verbose=True)
