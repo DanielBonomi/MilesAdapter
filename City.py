@@ -10,3 +10,9 @@ class City:
 
     def get_coordinates(self):
         return self.lat, self.lon
+
+    def __str__(self):
+        if self.lat and self.lon:
+            return f'Name:\t{self.name}\nPopulation:\t{self.population}\nCoordinates:\t' + str((self.lat, self.lon))
+        else:
+            return f'Name:\t{self.name}\nPopulation:\t{self.population}'

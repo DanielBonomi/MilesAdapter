@@ -1,11 +1,9 @@
 import os
-
-from City import City
-
+import json
 from geopy.distance import geodesic as GD
 from geopy.geocoders import Nominatim
+from City import City
 
-import json
 
 class ResourceLoader:
     def __init__(self, filename='resources/cities.csv'):
@@ -20,8 +18,6 @@ class ResourceLoader:
             return self.load(closest_to_keep=closest_to_keep)
 
     def load(self, closest_to_keep=10, read_distances=False,verbose=False):
-
-        geolocator = Nominatim(user_agent="ResourceLoader")
 
         # files are a csv where first column is city name, second is
         cities_dict = {}
@@ -52,6 +48,8 @@ class ResourceLoader:
                 return cities_distances, cities_dict
         else:
             # load distances from geopy
+            geolocator = Nominatim(user_agent="ResourceLoader")
+
             for city in cities_dict.keys():
                 try:
                     locator = geolocator.geocode(city)

@@ -1,11 +1,11 @@
-from shapely import LineString
-from shapely.geometry import Point
 import geopandas as gpd
 from geopandas import GeoDataFrame
-import geodatasets
 import matplotlib.pyplot as plt
+from shapely import Polygon
+from shapely.geometry import Point
 
 from ResourceLoader import ResourceLoader
+
 
 class AmericanSystem:
     def __init__(self, filename=None):
@@ -48,7 +48,6 @@ class AmericanSystem:
 
         states = gpd.read_file("./resources/cb_2018_us_state_500k/")
 
-        from shapely import Polygon
         polygon = Polygon([(-160, 15), (-160, 50), (-50, 50), (-50, 15)])
 
         gdf.plot(ax=states.clip(polygon).plot(figsize=(10, 6)), marker='o', color='red', markersize=15)
@@ -58,7 +57,6 @@ class AmericanSystem:
             print(coords_list[i-1], coords_list[i])
 
         plt.show()
-
 
     def find_path(self, begin, goal):
         if begin == goal:
@@ -124,6 +122,7 @@ if __name__ == '__main__':
 
     '''
     # this can be used to check reachability
+    # search path between two random cities for 1000 times
     import random
     err_count = 0
     for i in range(1000):
