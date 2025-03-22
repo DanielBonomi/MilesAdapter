@@ -9,16 +9,15 @@ from ResourceLoader import ResourceLoader
 
 class AmericanSystem:
     def __init__(self, r_loader):
-        self.distances, self.cities = r_loader.quick_load(10)  # discard info on city population, ecc
+        self.distances, self.cities = r_loader.quick_load()  # discard info on city population, ecc
+        self.title = None
 
-    def print_route(self, begin, goal):
-
-        path, total_length = self.find_path(begin, goal)
+    def print_route(self, path, total_length):
         previous = path[0]
         for city in path[1:]:
-            print('From ' + str(previous) + ' to ' + str(city))
+            print(f'From {previous} to {city}')
             previous = city
-        print('Total length: ' + str(total_length))
+        print(f'Total length: {round(total_length,1)}')
 
     def show_route(self, path, total_length):
         begin = path[0]
@@ -66,7 +65,7 @@ class AmericanSystem:
 
         plt.annotate(legend_text, xy=legend_pos, fontsize=10, verticalalignment='top')
 
-        plt.title(f'{begin} → {goal}   (distance: {round(total_length,1)})')
+        self.change_title(f'{begin} → {goal}   ({round(total_length,1)} miles)')
 
     def find_path(self, begin, goal):
         if begin == goal:
@@ -125,12 +124,18 @@ class AmericanSystem:
             return route, city_value[goal]
 
     def open_pop_up(self):
+        plt.title(self.title)
         plt.show()
 
+    def change_title(self, title):
+        self.title = title
+
+
 if __name__ == '__main__':
+    # Execute this file to get example of american system path
     r = ResourceLoader()
     am = AmericanSystem(r)
-    path, total_length = am.find_path('Seattle; Washington', 'New York City; New York')
+    path, total_length = am.find_path('Seattle; Washington', 'Dallas; Texas')
     am.show_route(path, total_length)
     am.open_pop_up()
 

@@ -11,15 +11,16 @@ class ResourceLoader:
         self.cache_file = 'resources/cities_info.json'
         self.progress_file = 'resources/cities_progress.txt'
 
-    def quick_load(self, closest_to_keep=10):
-
-        if os.path.isfile(self.cache_file) and not closest_to_keep != 10:
-            return self.load(closest_to_keep=closest_to_keep, read_distances=True)
+    def quick_load(self):
+        if os.path.isfile(self.cache_file):
+            return self.load(read_distances=True)
         else:
-            return self.load(closest_to_keep=closest_to_keep)
+            return self.load()
 
-    def load(self, closest_to_keep=10, read_distances=False, verbose=False, resume=False):
+    def load(self, read_distances=False, verbose=False, resume=False):
         # files are a csv where first column is city name, second is
+        closest_to_keep = 10
+
         cities_dict = {}
         with open(self.filename) as file:
             for line in file:
@@ -127,6 +128,9 @@ class ResourceLoader:
             with open(self.cache_file, 'w') as outfile:
                 d = {'distances': cities_distances, 'coords': coords}
                 json.dump(d, outfile)
+
+            with open(self.progress_file, 'w') as progress_file:
+                progress_file.write('0')
 
         return cities_distances, cities_dict
 
