@@ -1,7 +1,5 @@
 import os
 import json
-from geopy.distance import geodesic as GD
-from geopy.geocoders import Nominatim
 from City import City
 
 
@@ -48,6 +46,10 @@ class ResourceLoader:
                     city.set_coordinates(coords[city.name])
                 return cities_distances, cities_dict
         else:
+            #usually it would be best to import at the beginning of the file but importing here allows to run
+            # read_distance=True without having the import installed
+            from geopy.distance import geodesic as GD
+            from geopy.geocoders import Nominatim
             # load distances from geopy
             geolocator = Nominatim(user_agent="ResourceLoader")
             if verbose:
