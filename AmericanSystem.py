@@ -52,9 +52,25 @@ class AmericanSystem:
 
         gdf.plot(ax=states.clip(polygon).plot(figsize=(10, 6)), marker='o', color='red', markersize=15)
 
+        plt.text(coords_list[0][0], coords_list[0][1]-2, begin, fontsize=8, horizontalalignment='center')
+        plt.text(coords_list[-1][0], coords_list[-1][1]-2, goal, fontsize=8, horizontalalignment='center')
+        legend_text = 'Start: ' + begin + '\n'
         for i in range(1, len(path)):
+            # plot line
             plt.plot([coords_list[i-1][0], coords_list[i][0]], [coords_list[i-1][1],coords_list[i][1]], color='blue')
-            print(coords_list[i-1], coords_list[i])
+
+            if i < len(path)-1:
+                # plot number
+                plt.annotate(str(i), xy= tuple(coords_list[i]),
+                             fontsize=10,
+                             color='black')
+                legend_text += str(i) + ': ' + path[i] + '\n'
+
+        legend_text += 'Goal: ' + goal
+        legend_pos = (-160, 50)
+
+        plt.annotate(legend_text, xy=legend_pos, fontsize=10, verticalalignment='top')
+
 
         plt.show()
 
@@ -118,7 +134,7 @@ class AmericanSystem:
 
 if __name__ == '__main__':
     am = AmericanSystem()
-    am.show_route('Honolulu; Hawaii', 'Boston; Massachusetts')
+    am.show_route('Seattle; Washington', 'Arlington; Texas')
 
     '''
     # this can be used to check reachability
