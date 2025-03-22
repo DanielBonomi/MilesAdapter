@@ -8,14 +8,8 @@ from ResourceLoader import ResourceLoader
 
 
 class AmericanSystem:
-    def __init__(self, filename=None):
-        self.filename = filename
-        if filename is None:
-            r = ResourceLoader()
-        else:
-            r = ResourceLoader(filename)
-
-        self.distances, self.cities = r.quick_load(10)  # discard info on city population, ecc
+    def __init__(self, r_loader):
+        self.distances, self.cities = r_loader.quick_load(10)  # discard info on city population, ecc
 
     def print_route(self, begin, goal):
 
@@ -26,9 +20,10 @@ class AmericanSystem:
             previous = city
         print('Total length: ' + str(total_length))
 
-    def show_route(self, begin, goal):
-        path, total_length = self.find_path(begin, goal)
-        print('Path calculated')
+    def show_route(self, path, total_length):
+        begin = path[0]
+        goal = path[-1]
+
         geometry = []
         lat_list = []
         lon_list = []
@@ -61,7 +56,7 @@ class AmericanSystem:
 
             if i < len(path)-1:
                 # plot number
-                plt.annotate(str(i), xy= tuple(coords_list[i]),
+                plt.annotate(str(i), xy = tuple(coords_list[i]),
                              fontsize=10,
                              color='black')
                 legend_text += str(i) + ': ' + path[i] + '\n'
@@ -71,8 +66,7 @@ class AmericanSystem:
 
         plt.annotate(legend_text, xy=legend_pos, fontsize=10, verticalalignment='top')
 
-
-        plt.show()
+        plt.title(f'{begin} → {goal}   (distance: {round(total_length,1)})')
 
     def find_path(self, begin, goal):
         if begin == goal:
@@ -130,11 +124,15 @@ class AmericanSystem:
             route.reverse()
             return route, city_value[goal]
 
-
+    def open_pop_up(self):
+        plt.show()
 
 if __name__ == '__main__':
-    am = AmericanSystem()
-    am.show_route('Seattle; Washington', 'Dallas; Texas')
+    r = ResourceLoader()
+    am = AmericanSystem(r)
+    path, total_length = am.find_path('Seattle; Washington', 'New York City; New York')
+    am.show_route(path, total_length)
+    am.open_pop_up()
 
     '''
     # this can be used to check reachability
