@@ -134,7 +134,7 @@ class AmericanSystem:
 
 if __name__ == '__main__':
     am = AmericanSystem()
-    am.show_route('Seattle; Washington', 'Arlington; Texas')
+    am.show_route('Seattle; Washington', 'Dallas; Texas')
 
     '''
     # this can be used to check reachability

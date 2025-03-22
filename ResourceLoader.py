@@ -49,14 +49,16 @@ class ResourceLoader:
         else:
             # load distances from geopy
             geolocator = Nominatim(user_agent="ResourceLoader")
-
+            if verbose:
+                print("Loading cities' positions")
+                print("THIS SOMETIMES FAILS DUE TO CONNECTION ERROR")
             for city in cities_dict.keys():
                 try:
-                    locator = geolocator.geocode(city)
+                    box = ((50, -160), (25, -65))  # prefers to search here (more or less US)
+                    locator = geolocator.geocode(city, viewbox=box)
                     lat_lon = locator.latitude, locator.longitude
                     cities_dict[city].set_coordinates(lat_lon)
                 except Exception as e:
-                    print(type(e))
                     print('Could not geolocate {}'.format(city))
                     raise e
 
