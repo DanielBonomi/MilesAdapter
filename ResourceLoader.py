@@ -9,6 +9,7 @@ class ResourceLoader:
     def __init__(self, filename='resources/cities.csv'):
         self.filename = filename
         self.cache_file = 'resources/cities_info.json'
+        self.progress_file = 'resources/cities_progress.txt'
 
     def quick_load(self, closest_to_keep=10):
 
@@ -17,8 +18,7 @@ class ResourceLoader:
         else:
             return self.load(closest_to_keep=closest_to_keep)
 
-    def load(self, closest_to_keep=10, read_distances=False,verbose=False):
-
+    def load(self, closest_to_keep=10, read_distances=False, verbose=False, resume=False):
         # files are a csv where first column is city name, second is
         cities_dict = {}
         with open(self.filename) as file:
@@ -52,15 +52,30 @@ class ResourceLoader:
             if verbose:
                 print("Loading cities' positions")
                 print("THIS SOMETIMES FAILS DUE TO CONNECTION ERROR")
-            for city in cities_dict.keys():
+            city_list = list(cities_dict.keys())
+            progress = 0
+            if resume:
+                with open(self.progress_file, 'r') as progress_file:
+                    progress = int(progress_file.read())
+
+            for i in range(progress, len(city_list)):
+                city = city_list[i]
                 try:
                     box = ((50, -160), (25, -65))  # prefers to search here (more or less US)
                     locator = geolocator.geocode(city, viewbox=box)
                     lat_lon = locator.latitude, locator.longitude
                     cities_dict[city].set_coordinates(lat_lon)
+
                 except Exception as e:
                     print('Could not geolocate {}'.format(city))
-                    raise e
+                    try:
+                        with open(self.progress_file, 'w') as progress_file:
+                            progress_file.write(str(progress))
+                        print(f'System crash: progress: {progress}/{len(city_list)}')
+                        print('To resume from here call with resume=True')
+                    except Exception as e2:
+                        print('Could not write to progress file due to: ' + type(e2).__name__)
+                    raise ValueError(f'Could not geolocate {city}')
 
             if verbose:
                 print('Loaded positions')
@@ -108,12 +123,14 @@ class ResourceLoader:
             coords = {}
             for el in cities_dict.values():
                 coords[el.name] = el.get_coordinates()
+
             with open(self.cache_file, 'w') as outfile:
                 d = {'distances': cities_distances, 'coords': coords}
                 json.dump(d, outfile)
 
         return cities_distances, cities_dict
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     r = ResourceLoader('resources/cities.csv')
-    r.load(10, read_distances=False, verbose=True)
+    r.load(10, read_distances=False, verbose=True, resume=True)
