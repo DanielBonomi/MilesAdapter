@@ -1,8 +1,10 @@
 
 # Adapter Design Pattern for an Application for Navigation
+## Author: Daniele Bonomi
 
 This is the implementation of an Adapter adapting one measure system into another.
-I looked online for a list of the 100 most populous cities in the USA and I put it in cities.csv.
-
-
-
+I looked online for a list of the 100 most populous cities in the USA and I put it in cities.csv. Then I built ResourceLoader.py, which finds the coordinates of the 100 cities using geopy.geocoders and calculates the distances between the cities in the USA. I had to use an external module to easily get the coordinates (latitude and longitude) and because calculating distances between points on a globe is non-trivial (and would have required quite some time). Please note that geopy sometimes fails due to connection errors: I've implemented an extra file to allow progress saving. With the distances calculated ResourceLoader create a graph where the cities are the nodes and the arcs are links between the cities. I chose to only keep the 10 smallest arcs but I made the graph undirected to allow full reachability from any city. ResourceLoader also has an option to read the distances from a json (which you can produce with the same ResourceLoader),  which I added to GitHub to allow to execute code without having geocode installed.
+Then there are 3 classes: AmericanSystem, which performs navigation operations in miles, SpanishSystem which is an abstract class used as an interface and Adapter, which adapts AmericanSystem to the interface of SpanishSystem. The design patter is implemented as usually.
+In AmericanSystem, I've implemented the path finder (I've implemented a simple Dijktra because I only needed to handle 100 cities), and a method that prints the path. Furthermore I've implemented a graphic interface to dinamically show the map of the USA with on it points of the cities in the path, as well as lines for the path itself. The graph also has a legend and shows the total path length in miles. For the graph I used geopanda with its dependencies matplotlib and shapely. I chose geopanda because it's the main library for geografical system that allows easy plots.
+Thanks to the Adapter, the client (main in this case) can access AmericanSystem through the interface if SpanishSystem, and the final result is similar plot in the spanish language and using km instead of miles.
+Executing main will ask as console input the start and goal city. I've added a function that looks through the cities to aid finding the cities. 
