@@ -43,6 +43,7 @@ def get_city(resource, purpose):
 
 
 if __name__ == '__main__':
+    # PLEASE READ README.md
     r_loader = ResourceLoader()
     usa_system = AmericanSystem(r_loader)
     begin = get_city(r_loader, 'starting city')

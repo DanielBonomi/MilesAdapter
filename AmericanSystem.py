@@ -71,12 +71,13 @@ class AmericanSystem:
         if begin == goal:
             return [begin], 0
 
-        # Dijkstra
+        # Dijkstra implementation
         inf = 2**100
         city_from = {}  # inverse path I'll need to follow
         city_value = {}  # cost of the best path so far
 
-        for name in self.distances:
+        for name in self.distances.keys():  # self.distance is the graph
+            # it's a dict  city_name: [(connected_city1,distance), (connected_city2,distance), etc]
             city_from[name] = None
             city_value[name] = inf
 
@@ -118,8 +119,8 @@ class AmericanSystem:
                 # add to route the city I needed to go to get to the last element of route
                 previous_city = city_from[route[-1]]
                 route.append(previous_city)
-                # list insert(0) in python costs theta of n
-                # so it's cheaper to append and then reverse
+                # list insert at pos 0 in python costs theta of n
+                # therefore it's cheaper to append and then reverse
             route.reverse()
             return route, city_value[goal]
 
@@ -150,7 +151,7 @@ if __name__ == '__main__':
         try:
             am.find_path(city1, city2)
         except Exception as e:
-            print(f'attempt{i}')
+            print(f' attempt {i}')
             print(city1, '--->', city2)
             err_count += 1
             #raise e
